@@ -34,6 +34,7 @@ import {
 } from "../utils/renderUtils.js";
 import BlueButton from "./BlueButton.js";
 import InteractivityOverlay from "./InteractivityOverlay.js";
+import LabelEditOverlay from "./LabelEditOverlay.js";
 import { LayoutTimelineSlider } from "./LayoutTimelineSlider.js";
 
 const DiagramPanelButtonContainer = styled.div`
@@ -343,6 +344,17 @@ export default function DiagramPanel() {
                   diagram.historyInfo?.get(diagram.historyLoc.sequenceId)
                     ?.pinnedInputPaths ?? null
                 }
+              />
+            )}
+          {svg &&
+            state &&
+            !workerState.compiling &&
+            !workerState.resampling &&
+            settings.contents.interactive !== "PlayMode" && (
+              <LabelEditOverlay
+                diagramSVG={svg}
+                state={state}
+                svgTitleCache={svgTitleCache}
               />
             )}
         </div>

@@ -415,6 +415,8 @@ export type { Result } from "./utils/Error.js";
 export { default as Graph } from "./utils/Graph.js";
 export { buildRenderGraph, makeGroupGraph } from "./utils/GroupGraph.js";
 export * from "./utils/InteractionUtils.js";
+export { getSubstanceLabel, setSubstanceLabel } from "./utils/LabelEditing.js";
+export type { SubstanceLabel } from "./utils/LabelEditing.js";
 export {
   allWarnings,
   boolV,

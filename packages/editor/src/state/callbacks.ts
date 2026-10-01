@@ -183,6 +183,36 @@ export const useCompileDiagram = () => {
   );
 };
 
+/**
+ * Replace the Substance program (e.g. after a label was edited on the canvas)
+ * and recompile with the current variation, so the layout starts from the
+ * same random sample as before.
+ */
+export const useUpdateSubstance = () =>
+  useRecoilCallback(
+    ({ snapshot, set }) =>
+      async (substance: string) => {
+        set(fileContentsSelector("substance"), (file) => ({
+          ...file,
+          contents: substance,
+        }));
+        set(showCompileErrsState, true);
+        const workspace = snapshot.getLoadable(currentWorkspaceState)
+          .contents as Workspace;
+        const diagram = snapshot.getLoadable(diagramState).contents as Diagram;
+        await _compileDiagram(
+          substance,
+          workspace.files.style.contents,
+          workspace.files.domain.contents,
+          diagram.metadata.variation,
+          diagram.metadata.excludeWarnings,
+          diagram.diagramId,
+          set,
+        );
+      },
+    [],
+  );
+
 export const useIsUnsaved = () =>
   useRecoilCallback(({ snapshot, set }) => () => {
     const workspace = snapshot.getLoadable(currentWorkspaceState)
