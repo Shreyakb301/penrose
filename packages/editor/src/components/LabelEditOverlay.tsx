@@ -56,6 +56,7 @@ const LabelEditOverlay = memo((props: LabelEditOverlayProps): JSX.Element => {
   const substance = useRecoilValue(fileContentsSelector("substance")).contents;
   const updateSubstance = useUpdateSubstance();
   const [editing, setEditing] = useState<Editing | null>(null);
+  const [draftLength, setDraftLength] = useState(0);
   const overlay = useRef<HTMLDivElement | null>(null);
   // set when the user presses Escape, so the blur that follows doesn't commit
   const cancelled = useRef(false);
@@ -131,6 +132,7 @@ const LabelEditOverlay = memo((props: LabelEditOverlayProps): JSX.Element => {
       e.preventDefault();
       window.getSelection()?.removeAllRanges();
       cancelled.current = false;
+      setDraftLength(editable.get(hit.path)!.value.length);
       setEditing({
         ...editable.get(hit.path)!,
         bbox: getRelativeBBox(hit.elem, overlay.current),
@@ -158,9 +160,6 @@ const LabelEditOverlay = memo((props: LabelEditOverlayProps): JSX.Element => {
     await updateSubstance(res.value);
   };
 
-  const minWidth = 120;
-  const height = 28;
-
   return (
     <div
       style={{
@@ -183,6 +182,7 @@ const LabelEditOverlay = memo((props: LabelEditOverlayProps): JSX.Element => {
           }
           spellCheck={!editing.math}
           onFocus={(e) => e.currentTarget.select()}
+          onInput={(e) => setDraftLength(e.currentTarget.value.length)}
           onBlur={(e) => commit(e.currentTarget.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -194,16 +194,14 @@ const LabelEditOverlay = memo((props: LabelEditOverlayProps): JSX.Element => {
           }}
           style={{
             position: "absolute",
-            boxSizing: "border-box",
-            left: `${
-              editing.bbox.x +
-              editing.bbox.width / 2 -
-              Math.max(editing.bbox.width + 24, minWidth) / 2
-            }px`,
-            top: `${editing.bbox.y + editing.bbox.height / 2 - height / 2}px`,
-            width: `${Math.max(editing.bbox.width + 24, minWidth)}px`,
-            height: `${height}px`,
-            padding: "0 6px",
+            boxSizing: "content-box",
+            left: `${editing.bbox.x + editing.bbox.width / 2}px`,
+            top: `${editing.bbox.y + editing.bbox.height / 2}px`,
+            transform: "translate(-50%, -50%)",
+            // fit the text being typed, with room for the caret
+            width: `${Math.max(draftLength, 1) + 1}ch`,
+            height: "20px",
+            padding: "1px 4px",
             fontSize: "14px",
             fontFamily: editing.math ? "monospace" : "inherit",
             textAlign: "center",
